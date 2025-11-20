@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 export default function Dashboard() {
   const navigate = useNavigate();
 
-  // ⭐ Added this line
   const isAdmin = sessionStorage.getItem("isAdmin") === "true";
 
   const [balance, setBalance] = useState(0);
@@ -16,7 +15,6 @@ export default function Dashboard() {
   const [mobile, setMobile] = useState("");
   const [email, setEmail] = useState("");
   const [amount, setAmount] = useState("");
-
   const [message, setMessage] = useState("");
 
   // -----------------------------
@@ -27,12 +25,11 @@ export default function Dashboard() {
       const token = sessionStorage.getItem("token");
 
       const { data } = await axios.get(
-        "http://quickpaybackend-gtda.onrender.com/api/wallet/balance",
+        "https://quickpaybackend-gtda.onrender.com/api/wallet/balance",
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
       setBalance(data.balance);
-
     } catch (err) {
       console.error(err);
       alert("Unable to fetch wallet balance");
@@ -44,7 +41,7 @@ export default function Dashboard() {
   }, []);
 
   // -----------------------------
-  // Inactivity Logout
+  // Auto Logout After 1 Minute
   // -----------------------------
   useEffect(() => {
     let timeout;
@@ -83,7 +80,7 @@ export default function Dashboard() {
       const token = sessionStorage.getItem("token");
 
       await axios.post(
-        "http://quickpaybackend-gtda.onrender.com/api/wallet/add",
+        "https://quickpaybackend-gtda.onrender.com/api/wallet/add",
         { amount: parseInt(addAmount) },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -91,7 +88,6 @@ export default function Dashboard() {
       setAddAmount("");
       fetchBalance();
       alert("Money added!");
-
     } catch (err) {
       console.error(err);
       alert("Failed to add money");
@@ -116,7 +112,7 @@ export default function Dashboard() {
 
     try {
       const { data } = await axios.post(
-        "http://quickpaybackend-gtda.onrender.com/api/payment/create-order",
+        "https://quickpaybackend-gtda.onrender.com/api/payment/create-order",
         { amount, customerName, mobile, email },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -125,7 +121,6 @@ export default function Dashboard() {
 
       const options = {
         key: import.meta.env.VITE_RAZORPAY_KEY,
-
         amount: order.amount,
         currency: "INR",
         name: "QuickPay",
@@ -148,7 +143,7 @@ export default function Dashboard() {
           );
 
           await axios.post(
-            "http://quickpaybackend-gtda.onrender.com/api/wallet/deduct",
+            "https://quickpaybackend-gtda.onrender.com/api/wallet/deduct",
             { amount: parseInt(amount) },
             { headers: { Authorization: `Bearer ${token}` } }
           );
@@ -166,7 +161,6 @@ export default function Dashboard() {
 
       const rzp = new window.Razorpay(options);
       rzp.open();
-
     } catch (err) {
       console.error(err);
       alert("Payment failed!");
@@ -179,9 +173,8 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-50 p-6 relative">
 
+      {/* Top Buttons */}
       <div className="absolute top-4 right-4 flex gap-3">
-
-        {/* ⭐ Admin Button Here */}
         {isAdmin && (
           <button
             onClick={() => navigate("/admin")}
@@ -210,6 +203,7 @@ export default function Dashboard() {
         QuickPay Dashboard
       </h1>
 
+      {/* Wallet Toggle */}
       <div className="text-center mt-3">
         <button
           onClick={() => setShowWallet(!showWallet)}
@@ -219,6 +213,7 @@ export default function Dashboard() {
         </button>
       </div>
 
+      {/* Wallet Section */}
       {showWallet && (
         <div className="bg-white p-6 rounded-xl shadow-md w-full max-w-xl mx-auto mt-4">
           <h3 className="text-xl font-semibold">💰 Wallet Balance</h3>
@@ -289,7 +284,9 @@ export default function Dashboard() {
           Send Money
         </button>
 
-        {message && <p className="mt-4 text-gray-600">{message}</p>}
+        {message && (
+          <p className="mt-4 text-gray-600 text-center">{message}</p>
+        )}
       </div>
     </div>
   );

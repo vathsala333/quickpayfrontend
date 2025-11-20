@@ -27,7 +27,7 @@ export default function Dashboard() {
       const token = sessionStorage.getItem("token");
 
       const { data } = await axios.get(
-        "http://localhost:5000/api/wallet/balance",
+        "http://quickpaybackend-gtda.onrender.com/api/wallet/balance",
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -83,7 +83,7 @@ export default function Dashboard() {
       const token = sessionStorage.getItem("token");
 
       await axios.post(
-        "http://localhost:5000/api/wallet/add",
+        "http://quickpaybackend-gtda.onrender.com/api/wallet/add",
         { amount: parseInt(addAmount) },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -116,7 +116,7 @@ export default function Dashboard() {
 
     try {
       const { data } = await axios.post(
-        "http://localhost:5000/api/payment/create-order",
+        "http://quickpaybackend-gtda.onrender.com/api/payment/create-order",
         { amount, customerName, mobile, email },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -148,7 +148,7 @@ export default function Dashboard() {
           );
 
           await axios.post(
-            "http://localhost:5000/api/wallet/deduct",
+            "http://quickpaybackend-gtda.onrender.com/api/wallet/deduct",
             { amount: parseInt(amount) },
             { headers: { Authorization: `Bearer ${token}` } }
           );

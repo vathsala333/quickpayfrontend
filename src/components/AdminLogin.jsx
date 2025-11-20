@@ -13,7 +13,7 @@ export default function AdminLogin() {
     e.preventDefault();
     setMsg("");
     try {
-      const { data } = await axios.post("http://localhost:5000/api/admin-setup/admin-login", { email, password });
+      const { data } = await axios.post("https://quickpaybackend-gtda.onrender.com/api/admin-setup/admin-login", { email, password });
       if (data.success) {
         sessionStorage.setItem("token", data.token);
         sessionStorage.setItem("userId", data.user.id);

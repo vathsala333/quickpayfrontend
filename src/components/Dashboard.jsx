@@ -138,7 +138,7 @@ export default function Dashboard() {
           }
 
           await axios.post(
-            "http://localhost:5000/api/payment/update-status",
+            "https://quickpaybackend-gtda.onrender.com/api/payment/update-status",
             {
               orderId: order.id,
               paymentId: response.razorpay_payment_id,

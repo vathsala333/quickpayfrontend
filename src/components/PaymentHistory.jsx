@@ -28,7 +28,7 @@ export default function PaymentHistory() {
 
       try {
         const { data } = await axios.get(
-          "http://localhost:5000/api/payment/history",
+          "https://quickpaybackend-gtda.onrender.com/api/payment/history",
           { headers: { Authorization: `Bearer ${token}` } }
         );
 

@@ -13,7 +13,7 @@ export default function AdminDashboard() {
     if (!token) return navigate("/admin-login");
 
     // Fetch users
-    axios.get("http://localhost:5000/api/admin/users", { headers: { Authorization: `Bearer ${token}` } })
+    axios.get("https://quickpaybackend-gtda.onrender.com/api/admin/users", { headers: { Authorization: `Bearer ${token}` } })
       .then(res => setUsers(res.data))
       .catch(err => {
         console.error(err);

@@ -18,7 +18,7 @@ export default function Login() {
 
     try {
       const { data } = await axios.post(
-        "http://localhost:5000/api/auth/login",
+        "https://quickpaybackend-gtda.onrender.com/api/auth/login",
         { email, password }
       );
 

@@ -15,7 +15,7 @@ export default function CreateAdmin() {
     e.preventDefault();
     setMsg("");
     try {
-      const { data } = await axios.post("http://localhost:5000/api/admin-setup/create-admin", {
+      const { data } = await axios.post("https://quickpaybackend-gtda.onrender.com/api/admin-setup/create-admin", {
         name, email, password, adminSecret
       });
 

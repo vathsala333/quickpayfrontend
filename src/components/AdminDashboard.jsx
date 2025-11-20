@@ -21,7 +21,7 @@ export default function AdminDashboard() {
       });
 
     // Fetch transactions
-    axios.get("http://localhost:5000/api/admin/transactions", { headers: { Authorization: `Bearer ${token}` } })
+    axios.get("http://quickpaybackend-gtda.onrender.com/api/admin/transactions", { headers: { Authorization: `Bearer ${token}` } })
       .then(res => setTx(res.data))
       .catch(err => console.error(err));
   }, [navigate]);

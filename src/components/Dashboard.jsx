@@ -3,6 +3,8 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
+  console.log("KEY:", import.meta.env.VITE_RAZORPAY_KEY);
+
   const navigate = useNavigate();
 
   const isAdmin = sessionStorage.getItem("isAdmin") === "true";

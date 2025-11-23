@@ -7,9 +7,8 @@ import ResetPassword from "./components/ResetPassword";
 import PaymentHistory from "./components/PaymentHistory";
 import Dashboard from "./components/Dashboard";
 
-import AdminDashboard from "./components/AdminDashboard";
-import CreateAdmin from "./components/CreateAdmin";
-import AdminLogin from "./components/AdminLogin";
+
+
 
 function App() {
   return (
@@ -23,10 +22,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/history" element={<PaymentHistory />} />
 
-        {/* ADMIN ROUTES */}
-        <Route path="/create-admin" element={<CreateAdmin />} />
-        <Route path="/admin-login" element={<AdminLogin />} />
-        <Route path="/admin" element={<AdminDashboard />} />
+     
       </Routes>
     </BrowserRouter>
   );

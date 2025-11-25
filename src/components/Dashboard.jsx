@@ -6,12 +6,10 @@ export default function Dashboard() {
   console.log("KEY:", import.meta.env.VITE_RAZORPAY_KEY);
 
   const navigate = useNavigate();
-
   const isAdmin = sessionStorage.getItem("isAdmin") === "true";
 
   const [balance, setBalance] = useState(0);
   const [showWallet, setShowWallet] = useState(false);
-
   const [addAmount, setAddAmount] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [mobile, setMobile] = useState("");
@@ -19,18 +17,18 @@ export default function Dashboard() {
   const [amount, setAmount] = useState("");
   const [message, setMessage] = useState("");
 
+  const BASE_URL = "https://qpaybackend.onrender.com";
+
   // -----------------------------
   // Fetch Wallet Balance
   // -----------------------------
-  // FIX: Use a GET request to the correct endpoint for fetching the balance.
   const fetchBalance = async () => {
     try {
       const token = sessionStorage.getItem("token");
 
-      const { data } = await axios.get(
-        "qpaybackend.onrender.com", // Use a generic GET route for wallet
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const { data } = await axios.get(`${BASE_URL}/balance`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       setBalance(data.balance);
     } catch (err) {
@@ -60,7 +58,6 @@ export default function Dashboard() {
 
     window.addEventListener("mousemove", reset);
     window.addEventListener("keydown", reset);
-
     reset();
 
     return () => {
@@ -82,15 +79,14 @@ export default function Dashboard() {
     try {
       const token = sessionStorage.getItem("token");
 
-      // This POST request is correct for adding money
       await axios.post(
-        "qpaybackend.onrender.com/add",
+        `${BASE_URL}/add`,
         { amount: parseInt(addAmount) },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
       setAddAmount("");
-      fetchBalance(); // Refresh balance after successful addition
+      fetchBalance();
       alert("Money added!");
     } catch (err) {
       console.error(err);
@@ -115,8 +111,9 @@ export default function Dashboard() {
     }
 
     try {
+      // 1️⃣ Create order on backend
       const { data } = await axios.post(
-        "qpaybackend.onrender.com",
+        `${BASE_URL}/create-order`,
         { amount, customerName, mobile, email },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -129,15 +126,15 @@ export default function Dashboard() {
         currency: "INR",
         name: "QuickPay",
         order_id: order.id,
-
         handler: async function (response) {
           if (!response.razorpay_payment_id) {
             alert("Payment failed");
             return;
           }
 
+          // 2️⃣ Update payment status on backend
           await axios.post(
-            "qpaybackend.onrender.com",
+            `${BASE_URL}/payment-complete`,
             {
               orderId: order.id,
               paymentId: response.razorpay_payment_id,
@@ -146,21 +143,21 @@ export default function Dashboard() {
             { headers: { Authorization: `Bearer ${token}` } }
           );
 
+          // 3️⃣ Deduct amount from wallet
           await axios.post(
-            "qpaybackend.onrender.com/deduct",
-            { amount: parseInt(amount) },
+            `${BASE_URL}/deduct`,
+            { amount: parseInt(amount), orderId: order.id },
             { headers: { Authorization: `Bearer ${token}` } }
           );
 
           setMessage("Payment Successful!");
           fetchBalance();
         },
-
         modal: {
           ondismiss: function () {
             alert("Payment cancelled!");
-          }
-        }
+          },
+        },
       };
 
       const rzp = new window.Razorpay(options);
@@ -171,12 +168,8 @@ export default function Dashboard() {
     }
   };
 
-  // -----------------------------
-  // UI
-  // -----------------------------
   return (
     <div className="min-h-screen bg-gray-50 p-6 relative">
-
       {/* Top Buttons */}
       <div className="absolute top-4 right-4 flex gap-3">
         {isAdmin && (
@@ -187,16 +180,17 @@ export default function Dashboard() {
             Admin Panel
           </button>
         )}
-
         <button
           onClick={() => navigate("/history")}
           className="bg-gray-800 text-white px-4 py-2 rounded-lg"
         >
           View History
         </button>
-
         <button
-          onClick={() => { sessionStorage.clear(); navigate("/login"); }}
+          onClick={() => {
+            sessionStorage.clear();
+            navigate("/login");
+          }}
           className="bg-red-600 text-white px-4 py-2 rounded-lg"
         >
           Logout
@@ -228,7 +222,6 @@ export default function Dashboard() {
       {/* Add Money */}
       <div className="bg-white p-6 rounded-xl shadow-md w-full max-w-xl mx-auto mt-6">
         <h3 className="text-xl font-semibold">➕ Add Money</h3>
-
         <input
           type="number"
           placeholder="Amount"
@@ -236,7 +229,6 @@ export default function Dashboard() {
           onChange={(e) => setAddAmount(e.target.value)}
           className="border p-2 w-full rounded mt-3"
         />
-
         <button
           onClick={handleAddMoney}
           className="w-full bg-blue-600 text-white py-2 rounded mt-3"
@@ -248,7 +240,6 @@ export default function Dashboard() {
       {/* Send Money */}
       <div className="bg-white p-6 rounded-xl shadow-md w-full max-w-xl mx-auto mt-6">
         <h3 className="text-xl font-semibold mb-3">Send Money</h3>
-
         <input
           type="text"
           placeholder="Customer Name"
@@ -256,7 +247,6 @@ export default function Dashboard() {
           onChange={(e) => setCustomerName(e.target.value)}
           className="border p-2 w-full rounded mb-3"
         />
-
         <input
           type="tel"
           placeholder="Mobile"
@@ -264,7 +254,6 @@ export default function Dashboard() {
           onChange={(e) => setMobile(e.target.value)}
           className="border p-2 w-full rounded mb-3"
         />
-
         <input
           type="email"
           placeholder="Email (optional)"
@@ -272,7 +261,6 @@ export default function Dashboard() {
           onChange={(e) => setEmail(e.target.value)}
           className="border p-2 w-full rounded mb-3"
         />
-
         <input
           type="number"
           placeholder="Amount"
@@ -280,14 +268,12 @@ export default function Dashboard() {
           onChange={(e) => setAmount(e.target.value)}
           className="border p-2 w-full rounded mb-4"
         />
-
         <button
           onClick={handlePayment}
           className="w-full bg-green-600 text-white py-2 rounded"
         >
           Send Money
         </button>
-
         {message && (
           <p className="mt-4 text-gray-600 text-center">{message}</p>
         )}
@@ -295,4 +281,3 @@ export default function Dashboard() {
     </div>
   );
 }
-

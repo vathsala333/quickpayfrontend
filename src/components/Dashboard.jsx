@@ -22,12 +22,13 @@ export default function Dashboard() {
   // -----------------------------
   // Fetch Wallet Balance
   // -----------------------------
+  // FIX: Use a GET request to the correct endpoint for fetching the balance.
   const fetchBalance = async () => {
     try {
       const token = sessionStorage.getItem("token");
 
       const { data } = await axios.get(
-        "https://qpaybackend.onrender.com/api/wallet/add",
+        "qpaybackend.onrender.com", // Use a generic GET route for wallet
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -81,14 +82,15 @@ export default function Dashboard() {
     try {
       const token = sessionStorage.getItem("token");
 
+      // This POST request is correct for adding money
       await axios.post(
-        "https://qpaybackend.onrender.com/api/wallet/add",
+        "qpaybackend.onrender.com/add",
         { amount: parseInt(addAmount) },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
       setAddAmount("");
-      fetchBalance();
+      fetchBalance(); // Refresh balance after successful addition
       alert("Money added!");
     } catch (err) {
       console.error(err);
@@ -114,7 +116,7 @@ export default function Dashboard() {
 
     try {
       const { data } = await axios.post(
-        "https://qpaybackend.onrender.com/api/payment/create-order",
+        "qpaybackend.onrender.com",
         { amount, customerName, mobile, email },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -135,7 +137,7 @@ export default function Dashboard() {
           }
 
           await axios.post(
-            "https://qpaybackend.onrender.com/api/payment/update-status",
+            "qpaybackend.onrender.com",
             {
               orderId: order.id,
               paymentId: response.razorpay_payment_id,
@@ -145,7 +147,7 @@ export default function Dashboard() {
           );
 
           await axios.post(
-            "https://qpaybackend.onrender.com/api/wallet/deduct",
+            "qpaybackend.onrender.com/deduct",
             { amount: parseInt(amount) },
             { headers: { Authorization: `Bearer ${token}` } }
           );
@@ -293,3 +295,4 @@ export default function Dashboard() {
     </div>
   );
 }
+

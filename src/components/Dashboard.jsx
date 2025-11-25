@@ -27,7 +27,7 @@ export default function Dashboard() {
       const token = sessionStorage.getItem("token");
 
       const { data } = await axios.get(
-        "https://quickpaybackend-gtda.onrender.com/api/wallet/balance",
+        "https://qpaybackend.onrender.com/api/wallet/add",
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -82,7 +82,7 @@ export default function Dashboard() {
       const token = sessionStorage.getItem("token");
 
       await axios.post(
-        "https://quickpaybackend-gtda.onrender.com/api/wallet/add",
+        "https://qpaybackend.onrender.com/api/wallet/add",
         { amount: parseInt(addAmount) },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -114,7 +114,7 @@ export default function Dashboard() {
 
     try {
       const { data } = await axios.post(
-        "https://quickpaybackend-gtda.onrender.com/api/payment/create-order",
+        "https://qpaybackend.onrender.com/api/payment/create-order",
         { amount, customerName, mobile, email },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -135,7 +135,7 @@ export default function Dashboard() {
           }
 
           await axios.post(
-            "https://quickpaybackend-gtda.onrender.com/api/payment/update-status",
+            "https://qpaybackend.onrender.com/api/payment/update-status",
             {
               orderId: order.id,
               paymentId: response.razorpay_payment_id,
@@ -145,7 +145,7 @@ export default function Dashboard() {
           );
 
           await axios.post(
-            "https://quickpaybackend-gtda.onrender.com/api/wallet/deduct",
+            "https://qpaybackend.onrender.com/api/wallet/deduct",
             { amount: parseInt(amount) },
             { headers: { Authorization: `Bearer ${token}` } }
           );

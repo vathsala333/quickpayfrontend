@@ -18,7 +18,7 @@ export default function Signup() {
     }
 
     try {
-      const { data } = await axios.post("https://quickpaybackend-gtda.onrender.com/api/auth/signup", {
+      const { data } = await axios.post("https://qpaybackend.onrender.com/api/auth/signup", {
         name,
         email,
         password,

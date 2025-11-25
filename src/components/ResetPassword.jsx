@@ -14,7 +14,7 @@ export default function ResetPassword() {
 
     try {
       const res = await axios.post(
-        `https://quickpaybackend-gtda.onrender.com/api/auth/reset-password/${token}`,
+        `https://qpaybackend.onrender.com/api/auth/reset-password/${token}`,
         { password }
       );
       setMessage(res.data.message);

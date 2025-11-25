@@ -1,13 +1,15 @@
+
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
-  console.log("KEY:", import.meta.env.VITE_RAZORPAY_KEY);
-
   const navigate = useNavigate();
+
+  // Check admin
   const isAdmin = sessionStorage.getItem("isAdmin") === "true";
 
+  // States
   const [balance, setBalance] = useState(0);
   const [showWallet, setShowWallet] = useState(false);
   const [addAmount, setAddAmount] = useState("");
@@ -17,11 +19,11 @@ export default function Dashboard() {
   const [amount, setAmount] = useState("");
   const [message, setMessage] = useState("");
 
-  const BASE_URL = "https://qpaybackend.onrender.com";
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL; // FIXED 🔥
 
-  // -----------------------------
+  // ---------------------------------------------
   // Fetch Wallet Balance
-  // -----------------------------
+  // ---------------------------------------------
   const fetchBalance = async () => {
     try {
       const token = sessionStorage.getItem("token");
@@ -32,7 +34,7 @@ export default function Dashboard() {
 
       setBalance(data.balance);
     } catch (err) {
-      console.error(err);
+      console.error("Balance Error:", err);
       alert("Unable to fetch wallet balance");
     }
   };
@@ -41,35 +43,35 @@ export default function Dashboard() {
     fetchBalance();
   }, []);
 
-  // -----------------------------
+  // ---------------------------------------------
   // Auto Logout After 1 Minute
-  // -----------------------------
+  // ---------------------------------------------
   useEffect(() => {
     let timeout;
 
-    const reset = () => {
+    const resetTimer = () => {
       clearTimeout(timeout);
       timeout = setTimeout(() => {
         sessionStorage.clear();
-        alert("Session expired due to inactivity.");
+        alert("Session expired due to inactivity");
         navigate("/login", { replace: true });
       }, 60000);
     };
 
-    window.addEventListener("mousemove", reset);
-    window.addEventListener("keydown", reset);
-    reset();
+    window.addEventListener("mousemove", resetTimer);
+    window.addEventListener("keydown", resetTimer);
+    resetTimer();
 
     return () => {
       clearTimeout(timeout);
-      window.removeEventListener("mousemove", reset);
-      window.removeEventListener("keydown", reset);
+      window.removeEventListener("mousemove", resetTimer);
+      window.removeEventListener("keydown", resetTimer);
     };
   }, [navigate]);
 
-  // -----------------------------
+  // ---------------------------------------------
   // Add Money
-  // -----------------------------
+  // ---------------------------------------------
   const handleAddMoney = async () => {
     if (!addAmount || addAmount <= 0) {
       alert("Enter a valid amount");
@@ -81,22 +83,22 @@ export default function Dashboard() {
 
       await axios.post(
         `${BASE_URL}/add`,
-        { amount: parseInt(addAmount) },
+        { amount: Number(addAmount) },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
       setAddAmount("");
       fetchBalance();
-      alert("Money added!");
+      alert("Money added successfully!");
     } catch (err) {
-      console.error(err);
+      console.error("Add Money Error:", err);
       alert("Failed to add money");
     }
   };
 
-  // -----------------------------
-  // Razorpay Payment
-  // -----------------------------
+  // ---------------------------------------------
+  // Handle Payment
+  // ---------------------------------------------
   const handlePayment = async () => {
     const token = sessionStorage.getItem("token");
 
@@ -106,19 +108,19 @@ export default function Dashboard() {
     }
 
     if (amount > balance) {
-      alert("Insufficient balance");
+      alert("Insufficient wallet balance");
       return;
     }
 
     try {
-      // 1️⃣ Create order on backend
+      // Create Razorpay Order
       const { data } = await axios.post(
         `${BASE_URL}/create-order`,
-        { amount, customerName, mobile, email },
+        { amount: Number(amount), customerName, mobile, email },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      const { order } = data;
+      const order = data.order;
 
       const options = {
         key: import.meta.env.VITE_RAZORPAY_KEY,
@@ -126,13 +128,14 @@ export default function Dashboard() {
         currency: "INR",
         name: "QuickPay",
         order_id: order.id,
-        handler: async function (response) {
+
+        handler: async (response) => {
           if (!response.razorpay_payment_id) {
             alert("Payment failed");
             return;
           }
 
-          // 2️⃣ Update payment status on backend
+          // Save payment status
           await axios.post(
             `${BASE_URL}/payment-complete`,
             {
@@ -143,19 +146,20 @@ export default function Dashboard() {
             { headers: { Authorization: `Bearer ${token}` } }
           );
 
-          // 3️⃣ Deduct amount from wallet
+          // Deduct wallet amount
           await axios.post(
             `${BASE_URL}/deduct`,
-            { amount: parseInt(amount), orderId: order.id },
+            { amount: Number(amount), orderId: order.id },
             { headers: { Authorization: `Bearer ${token}` } }
           );
 
           setMessage("Payment Successful!");
           fetchBalance();
         },
+
         modal: {
-          ondismiss: function () {
-            alert("Payment cancelled!");
+          ondismiss: () => {
+            alert("Payment Cancelled!");
           },
         },
       };
@@ -163,11 +167,12 @@ export default function Dashboard() {
       const rzp = new window.Razorpay(options);
       rzp.open();
     } catch (err) {
-      console.error(err);
-      alert("Payment failed!");
+      console.error("Payment Error:", err);
+      alert("Payment failed");
     }
   };
 
+  // ---------------------------------------------
   return (
     <div className="min-h-screen bg-gray-50 p-6 relative">
       {/* Top Buttons */}
@@ -180,12 +185,14 @@ export default function Dashboard() {
             Admin Panel
           </button>
         )}
+
         <button
           onClick={() => navigate("/history")}
           className="bg-gray-800 text-white px-4 py-2 rounded-lg"
         >
           View History
         </button>
+
         <button
           onClick={() => {
             sessionStorage.clear();
@@ -240,6 +247,7 @@ export default function Dashboard() {
       {/* Send Money */}
       <div className="bg-white p-6 rounded-xl shadow-md w-full max-w-xl mx-auto mt-6">
         <h3 className="text-xl font-semibold mb-3">Send Money</h3>
+
         <input
           type="text"
           placeholder="Customer Name"
@@ -247,6 +255,7 @@ export default function Dashboard() {
           onChange={(e) => setCustomerName(e.target.value)}
           className="border p-2 w-full rounded mb-3"
         />
+
         <input
           type="tel"
           placeholder="Mobile"
@@ -254,6 +263,7 @@ export default function Dashboard() {
           onChange={(e) => setMobile(e.target.value)}
           className="border p-2 w-full rounded mb-3"
         />
+
         <input
           type="email"
           placeholder="Email (optional)"
@@ -261,6 +271,7 @@ export default function Dashboard() {
           onChange={(e) => setEmail(e.target.value)}
           className="border p-2 w-full rounded mb-3"
         />
+
         <input
           type="number"
           placeholder="Amount"
@@ -268,15 +279,15 @@ export default function Dashboard() {
           onChange={(e) => setAmount(e.target.value)}
           className="border p-2 w-full rounded mb-4"
         />
+
         <button
           onClick={handlePayment}
           className="w-full bg-green-600 text-white py-2 rounded"
         >
           Send Money
         </button>
-        {message && (
-          <p className="mt-4 text-gray-600 text-center">{message}</p>
-        )}
+
+        {message && <p className="mt-4 text-gray-600 text-center">{message}</p>}
       </div>
     </div>
   );

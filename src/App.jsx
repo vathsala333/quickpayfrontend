@@ -1,28 +1,43 @@
-import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import Login from "./components/Login";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Signup from "./components/Signup";
-import ForgotPassword from "./components/ForgotPassword";
-import ResetPassword from "./components/ResetPassword";
+import Login from "./components/Login";
 import Dashboard from "./components/Dashboard";
-import PaymentHistory from "./components/PaymentHistory";
 
 function App() {
-  const isLoggedIn = !!sessionStorage.getItem("token");
+  const token = localStorage.getItem("token");
 
   return (
-    <Router>
+    <BrowserRouter>
       <Routes>
-        <Route path="/" element={isLoggedIn ? <Navigate to="/dashboard" /> : <Navigate to="/login" />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password/:token" element={<ResetPassword />} />
-        <Route path="/dashboard" element={isLoggedIn ? <Dashboard /> : <Navigate to="/login" />} />
-        <Route path="/payments" element={isLoggedIn ? <PaymentHistory /> : <Navigate to="/login" />} />
-        <Route path="*" element={<Navigate to="/" />} />
+
+        {/* Default Route Logic */}
+        <Route
+          path="/"
+          element={
+            token ? <Navigate to="/dashboard" /> : <Navigate to="/signup" />
+          }
+        />
+
+        {/* Signup Page */}
+        <Route
+          path="/signup"
+          element={ token ? <Navigate to="/dashboard" /> : <Signup /> }
+        />
+
+        {/* Login Page */}
+        <Route
+          path="/login"
+          element={ token ? <Navigate to="/dashboard" /> : <Login /> }
+        />
+
+        {/* Dashboard (Protected Route) */}
+        <Route
+          path="/dashboard"
+          element={ token ? <Dashboard /> : <Navigate to="/login" /> }
+        />
+
       </Routes>
-    </Router>
+    </BrowserRouter>
   );
 }
 

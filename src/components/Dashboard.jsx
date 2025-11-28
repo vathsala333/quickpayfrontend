@@ -7,14 +7,11 @@ export default function Dashboard() {
   const [balance, setBalance] = useState(0);
   const [amount, setAmount] = useState("");
 
-  const BASE_URL = import.meta.env.VITE_API_BASE_URL; // Must be https://qpaybackend.onrender.com
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-  // =========================
-  // Fetch Wallet Balance
-  // =========================
   const fetchBalance = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token"); // ← changed
 
       if (!token) {
         navigate("/login");
@@ -33,12 +30,9 @@ export default function Dashboard() {
     }
   };
 
-  // =========================
-  // Add Money
-  // =========================
   const addMoney = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token"); // ← changed
 
       const res = await axios.post(
         `${BASE_URL}/api/wallet/add`,
@@ -59,12 +53,9 @@ export default function Dashboard() {
     }
   };
 
-  // =========================
-  // Deduct Money
-  // =========================
   const deductMoney = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token"); // ← changed
 
       const res = await axios.post(
         `${BASE_URL}/api/wallet/deduct`,
@@ -85,11 +76,8 @@ export default function Dashboard() {
     }
   };
 
-  // =========================
-  // Logout
-  // =========================
   const logout = () => {
-    localStorage.removeItem("token");
+    sessionStorage.removeItem("token"); // ← changed
     navigate("/login");
   };
 
@@ -122,7 +110,10 @@ export default function Dashboard() {
 
       <br />
 
-      <button onClick={logout} style={{ marginTop: 30, background: "red", color: "white" }}>
+      <button
+        onClick={logout}
+        style={{ marginTop: 30, background: "red", color: "white" }}
+      >
         Logout
       </button>
     </div>
